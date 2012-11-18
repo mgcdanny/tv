@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="d3.js"></script>
+    
+    <style>
+
+   #title {
+      font-size:20pt;
+      font-family:sans-serif;
+      
+     }
+    
+    .axis path{
+        fill:none;
+        stroke: black;
+    }
+    .axis {
+        font-size:12pt;
+        font-family:sans-serif;
+    }
+    .tick {
+        fill:none;
+        stroke:black;
+    }
+
+    circle{
+        stroke:none;
+        fill:RoyalBlue;
+        opacity:0.2;
+    }
+
+   .labs {
+       fill:black;
+       color:black;
+       font-size:20px;  
+    }
+
+   .labs2 {
+       fill:red;
+       color:red;
+       font-size:40px;  
+    }
+
+    .MD {
+        fill:rgb(166, 206, 227);
+        opacity:0.3;
+        background-color:rgb(166, 206, 227);
+    }
+  
+    .CA {
+        fill: rgb(31, 120, 180);
+        opacity:0.3;
+        background-color:rgb(31, 120, 180);
+    }
+   
+    .NY {
+        fill: rgb(178, 223, 138);
+        opacity:0.3;
+        background-color:rgb(178, 223, 138);
+    }
+
+    .CO {
+        fill: rgb(51, 160, 44);
+        opacity:0.3;
+        background-color:rgb(51, 160, 44);
+    }
+
+    .MA {
+        fill: rgb(251, 154, 153);
+        opacity:0.3;
+        background-color:rgb(251, 154, 153);
+    }
+
+    .VA {
+        fill: rgb(227, 26, 28);
+        opacity:0.3;
+        background-color:rgb(227, 26, 28);
+    }
+
+    .GA {
+        fill: rgb(253, 191, 111);
+        opacity:0.3;
+        background-color:rgb(253, 191, 111);
+    }
+
+    .TN {
+        fill: rgb(255, 127, 0);
+        opacity:0.3;
+        background-color:rgb(255, 127, 0);
+    }
+
+    .TX {
+        fill: rgb(202, 178, 214);
+        opacity:0.3;
+        background-color:rgb(202, 178, 214);
+    }
+
+    .FL {
+        fill: rgb(106, 61, 154);
+        opacity:0.3;
+        background-color:rgb(106, 61, 154);
+    }
+  
+   .arrow{
+        stroke:red;
+        stroke-width:3;
+    }
+
+   .line {
+        float:left;
+     }
+
+   .line_container{
+        width: 150px;
+        height: 20px;
+    }
+
+    .key{
+        float:right;
+    }
+
+    .key_line{
+        font-size:17px;
+        width:100%;
+    }
+  
+   .key_square{
+        height:10px;
+        width:10px;
+        outline:solid 1px black;
+        float:left;
+        margin-right:10px;
+        margin-top:6px;
+        margin-left:10px;
+    }
+
+    #plot{
+        float:left;
+    }
+
+    </style>
+    
+    <script>
+
+    var x_scale;
+    var y_scale;
+
+    var xs_scale;
+    var ys_scale;
+
+
+
+    dataset = [{"state": "MA"},{"state": "NY"},{"state": "TX"},{"state": "GA"}
+              ,{"state": "CA"},{"state": "VA"},{"state": "TN"},{"state": "FL"}
+              ,{"state": "CO"},{"state": "MD"}];
+
+    function draw(data) {
+        "use strict";
+
+//set up the viewport, the scales, and axis generators
+        var container_dimensions = {width: 900, height: 500},
+            margins = {top: 10, right: 20, bottom: 30, left: 60},
+            chart_dimensions = {
+                width: container_dimensions.width - margins.left - margins.right,
+                height: container_dimensions.height - margins.top - margins.bottom
+            };
+ //load (channels) extent
+        var x_extent = d3.extent(data, function(d){return d.load1*1.2}),
+            y_extent = d3.extent(data, function(d){return d.load2*1.2});
+      
+         x_scale = d3.scale.linear()
+            .range([0,container_dimensions.width])
+            .domain(x_extent)
+        
+         y_scale = d3.scale.linear()
+            .range([container_dimensions.height,0])
+            .domain(y_extent)
+ 
+ //load (states) extent
+        var xs_extent = d3.extent(data, function(d){return d.sload1*1.2}),
+            ys_extent = d3.extent(data, function(d){return d.sload2*1.2});
+      
+         xs_scale = d3.scale.linear()
+            .range([0,container_dimensions.width])
+            .domain(xs_extent)
+        
+         ys_scale = d3.scale.linear()
+            .range([container_dimensions.height,0])
+            .domain(ys_extent)
+
+        var x_axis = d3.svg.axis()
+            .scale(x_scale)
+        
+        var y_axis = d3.svg.axis()
+            .scale(y_scale)
+            .orient("left");
+  
+ //draw axes    
+     var g = d3.select('#plot')
+          .append('svg')
+            .attr("width", container_dimensions.width)
+            .attr("height", container_dimensions.height)
+          .append("g")
+            .attr("transform", "translate(" + margins.left + "," + margins.top + ")")
+            .attr("id","chart");
+
+         g.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + chart_dimensions.height + ")")
+          .call(x_axis);
+         
+        g.append("g")
+          .attr("class", "y axis")
+          .call(y_axis);
+
+ // draw the y-axis label
+        d3.select('.y.axis')
+            .append('text')
+            .text('Load2')
+            .attr('transform', "rotate (-270, 0, 0)")
+            .attr('x', 100)
+            .attr('y', 50);
+        
+ // draw the key
+        var key_items = d3.select('#key')
+          .selectAll('div')
+          .data(dataset)
+          .enter()
+          .append('div')
+            .attr('class','key_line')
+            .attr('id',function(d){return d.state+"_key"})
+            
+        key_items.append('div')
+            .attr('id', function(d){return 'key_square_' + d.state})
+            .attr('class', function(d) {return 'key_square '+ d.state})
+        
+        key_items.append('div')
+            .attr('class','key_label')
+            .text(function(d){return d.state})
+        
+        d3.select('#key')
+             .append('div')
+             .attr('class','channels')
+             .text("Channels")
+ 
+        d3.selectAll('.key_line')
+            .on('click', get_pca)
+        
+        d3.selectAll('.channels')   
+         .on('click', get_channels);
+    
+        get_channels();
+
+  } //end draw function
+
+
+// gets data for dots
+
+       function get_pca() { 
+           var id = d3.select(this).attr("id");
+           var ts = d3.select("#"+id+"_path");
+           if (ts.empty()) {
+                d3.json('data/pca.json', function(data){
+                filtered_data = data.filter(function(d){return d.state+"_key" === id});
+                draw_pca(filtered_data, id);
+                 
+            })
+        } else {
+            ts.remove();
+        }
+    }
+
+
+//draws the dots
+    function draw_pca(data, id){
+              var g = d3.select('#chart')
+                     .append("g")
+                     .attr('id', id+"_path")
+   
+              var enter_duration = 1;
+           
+                  g.selectAll('circle')
+                     .data(data)
+                     .enter()
+                     .append('circle')
+                     .transition()
+                     //.delay(0)
+                     .delay(function(d, i) { return i / data.length * enter_duration; })
+                      .attr('cx', function(data){return xs_scale(data.sload1)})
+                      .attr('cy', function(data){return ys_scale(data.sload2)})
+                      .attr('r', 10)
+                      .attr('class', function(data){return data.state})                                     
+              }
+
+
+//get the channels
+    function get_channels(){
+            d3.selectAll('.labs').remove();
+            d3.selectAll('.arrow').remove();
+            d3.json('data/pca.json', draw_channels);
+       } 
+
+// draw the channels
+   function draw_channels(data){
+      var g = d3.select('#chart')
+                     .append("g");              
+
+       // draw channel lines
+        g.selectAll('.arrow')
+            .data(data)
+            .enter()
+            .append("line")
+              .attr("x1", function (d) {return x_scale(0)})
+              .attr("y1", function (d) {return y_scale(0)})
+              .attr("x2", function (d) {return x_scale(d.load1)})
+              .attr("y2", function (d) {return y_scale(d.load2)})
+              .attr('class','arrow');
+ 
+     //draw channel names
+            g.selectAll('.labs')
+                  .data(data)
+                     .enter()
+                     .append('text')
+                       .text(function(data){return data.chan})
+                       .attr("class", "labs")
+                       .attr('x', function(data){return x_scale(data.load1)})
+                       .attr('y', function(data){return y_scale(data.load2)});
+         }
+
+    </script>
+</head>
+<body>
+    <div id="title"> Principle Component Analysis of Viewership </div> </br> </br>
+    <div id="plot"></div>
+    <div id="key"></div>  </br> </br>
+    <div> </div>
+    <script>
+        d3.json('data/pca.json', draw);
+    </script>
+</body>
+</html>
+
